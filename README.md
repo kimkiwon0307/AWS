@@ -214,7 +214,7 @@ EC2 종료(Terminate) 후, 연결된 EBS 볼륨, Elastic IP(주소 릴리스), �
      ↓
     RDS
 ```
-
+</details>
 <details>
 <summary><h2>5장. AWS 스토리지 서비스 상세 정리</h2></summary>
 
