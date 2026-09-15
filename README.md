@@ -59,3 +59,63 @@
     * **Spot Instance:** AWS의 유휴 컴퓨팅 자원을 할인된 가격으로 사용하는 방식
 
 </details>
+
+
+<details>
+  <summary><b>2장 AWS 컴퓨팅 서비스</b></summary>
+  
+  <h3>2.1 AWS 컴퓨팅 서비스</h3>
+  <h4>2.1.1 컴퓨팅 정의</h4>
+  <ul>
+    <li><b>컴퓨팅이란?</b>: 컴퓨터의 CPU와 메모리 등의 자원을 이용해서 데이터를 처리하고 프로그램을 실행하는 것</li>
+    <li><b>서버에서 컴퓨팅 자원</b>: CPU, 메모리, 스토리지, 네트워크</li>
+    <li><b>클라우드에서 컴퓨팅</b>: 클라우드에서는 필요한 컴퓨팅 자원을 클라우드 사업자로부터 제공받음</li>
+  </ul>
+
+  <h4>2.1.2 AWS 컴퓨팅 서비스</h4>
+  <ul>
+    <li><b>Amazon EC2</b>: AWS에서 원하는 사양의 가상 서버를 만들어 사용하는 서비스</li>
+    <li><b>AWS Lambda</b>: 서버를 직접 관리하지 않고 함수 단위로 코드를 실행하는 서버리스(Serverless) 방식</li>
+    <li><b>Amazon ECS (Elastic Container Service)</b>: 컨테이너를 실행하고 관리하기 위한 AWS 서비스</li>
+    <li><b>Amazon EKS (Elastic Kubernetes Service)</b>: AWS에서 Kubernetes 클러스터를 운영할 수 있게 해주는 관리형 서비스</li>
+    <li><b>AWS Elastic Beanstalk</b>: 애플리케이션을 AWS에 비교적 쉽게 배포할 수 있도록 해주는 서비스</li>
+  </ul>
+
+  <h3>2.2 Amazon EC2 소개</h3>
+  <h4>2.2.1 Amazon EC2 인스턴스</h4>
+  <ul>
+    <li><b>EC2 인스턴스란?</b>: AWS에서 실행 중인 가상 서버 (EC2는 가상 서버를 제공하는 서비스, EC2 인스턴스는 그 안에서 실제로 실행되는 서버 하나)</li>
+    <li><b>인스턴스 타입</b>: EC2 서버의 하드웨어 사양을 결정하는 것</li>
+    <li><b>EC2 인스턴스의 상태</b>: 
+      <ul>
+        <li><code>Running</code> (서버 활성화)</li>
+        <li><code>Stopped</code> (서버 중지)</li>
+        <li><code>Terminated</code> (인스턴스 완전 종료)</li>
+      </ul>
+    </li>
+  </ul>
+
+  <h4>2.2.2 AMI (Amazon Machine Image)</h4>
+  <ul>
+    <li>EC2 인스턴스를 생성할 때 사용하는 서버 이미지 (OS와 기본적인 서버 환경 포함)</li>
+    <li>AWS 제공 AMI 사용 가능 및 직접 만든 서버를 AMI로 만들어 재사용 가능</li>
+    <li>여러 서버를 동일한 환경으로 배포할 때 유용하며, Auto Scaling 및 서버 표준화와 연결되는 중요한 개념</li>
+  </ul>
+
+  <h4>2.2.3 기타 EC2 핵심 요소</h4>
+  <ul>
+    <li><b>2.2.3 EC2 스토리지</b>: EC2의 대표적인 블록 스토리지는 EBS</li>
+    <li><b>2.2.4 EC2 네트워킹</b>: ENI, Private IP, Public IP, VPC, Subnet, Security Group 등을 통해 네트워크 구성</li>
+    <li><b>2.2.5 EC2 보안</b>: Key Pair + Security Group + OS 보안 등을 통해 서버 보호</li>
+    <li><b>2.2.6 EC2 모니터링</b>: CloudWatch와 Linux 도구를 이용해 서버 상태 확인</li>
+    <li><b>2.2.7 EC2 구입 옵션</b>: On-Demand / Savings Plans / Spot 등의 방식으로 비용 최적화</li>
+  </ul>
+</details>
+
+
+
+
+
+
+
+
