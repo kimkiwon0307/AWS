@@ -766,25 +766,753 @@ On-Demand = 약정 없이 사용
 Spot = 저렴하지만 중단 가능
 ```
 
+</details>
+<details>
+   <summary><h2>3장 AWS 네트워킹 서비스</h2></summary>
+   # AWS 3장 - AWS 네트워킹 서비스
 
+## 1. 네트워킹이란
 
+네트워킹은 여러 장치가 서로 데이터를 주고받을 수 있도록 연결하는 것이다.
 
+네트워크를 볼 때는 다음 흐름으로 생각한다.
 
+```text
+누가?
+→ 누구에게?
+→ 어떤 IP로?
+→ 어떤 경로로?
+→ 어떤 포트로?
+→ 어떤 프로토콜로?
+```
 
+예:
 
+```text
+내 PC
+→ EC2 Public IP
+→ TCP 22
+→ SSH
+```
 
+또는:
 
+```text
+브라우저
+→ EC2 Public IP
+→ TCP 80
+→ Apache
+```
 
+---
 
+# 2. 네트워킹 주요 요소
 
+## IP Address
+
+네트워크 장치를 식별하는 주소이다.
+
+예:
+
+```text
+WEB01 = 10.0.1.10
+WAS01 = 10.0.2.10
+```
+
+---
+
+## Subnet
+
+큰 네트워크를 작은 네트워크 범위로 나눈 것이다.
+
+예:
+
+```text
+VPC 10.0.0.0/16
+│
+├─ 10.0.1.0/24
+└─ 10.0.2.0/24
+```
+
+---
+
+## Route Table
+
+목적지 IP에 따라 패킷을 어디로 보낼지 결정한다.
+
+예:
+
+```text
+Destination       Target
+
+10.0.0.0/16       local
+0.0.0.0/0         Internet Gateway
+```
+
+---
+
+## Gateway
+
+다른 네트워크로 나가기 위한 출구이다.
+
+AWS에서 인터넷과 연결할 때 대표적으로 Internet Gateway를 사용한다.
+
+---
+
+## Firewall
+
+허용할 네트워크 통신을 제어한다.
+
+AWS에서는 대표적으로 다음을 사용한다.
+
+```text
+Security Group
+Network ACL
+```
+
+---
+
+# 3. AWS 리전 네트워킹
+
+AWS는 여러 Region을 운영한다.
+
+예:
+
+```text
+Asia Pacific (Seoul)
+ap-northeast-2
+```
+
+Region 안에는 여러 Availability Zone이 존재한다.
+
+```text
+Seoul Region
+│
+├─ AZ-A
+├─ AZ-B
+├─ AZ-C
+└─ AZ-D
+```
+
+여러 AZ에 서버를 분산하면 하나의 AZ에 장애가 발생해도 다른 AZ를 통해 서비스를 계속 제공할 수 있다.
+
+```text
+AZ-A
+└─ WEB01
+
+AZ-B
+└─ WEB02
+```
+
+### 핵심
+
+```text
+Region = 큰 지리적 영역
+
+Availability Zone = Region 내부의 분리된 데이터센터 그룹
+```
+
+---
+
+# 4. AWS 글로벌 네트워크와 Edge POP
+
+AWS는 전 세계적으로 자체 글로벌 네트워크와 Edge Location / POP를 운영한다.
+
+대표적인 활용 서비스는 CloudFront이다.
+
+```text
+사용자
+ ↓
+가까운 Edge Location
+ ↓
+CloudFront Cache
+ ↓
+Origin Server
+```
+
+사용자 가까운 위치에서 콘텐츠를 제공하여 지연 시간을 줄일 수 있다.
+
+---
+
+# 5. 주요 AWS 네트워크 서비스
+
+| 서비스 | 역할 |
+|---|---|
+| VPC | AWS 가상 네트워크 |
+| Subnet | VPC 내부 네트워크 분할 |
+| Route Table | 트래픽 경로 결정 |
+| Internet Gateway | VPC와 인터넷 연결 |
+| NAT Gateway | Private Subnet의 인터넷 Outbound |
+| Security Group | EC2/ENI 수준 방화벽 |
+| Network ACL | Subnet 수준 방화벽 |
+| Elastic IP | 고정 Public IPv4 |
+| VPC Peering | VPC와 VPC 연결 |
+| Transit Gateway | 여러 VPC/네트워크 중앙 연결 |
+| Site-to-Site VPN | On-Premises와 AWS 연결 |
+| Direct Connect | 전용 회선을 이용한 AWS 연결 |
+| ELB | 네트워크 트래픽 분산 |
+
+---
+
+# 6. Amazon VPC
+
+VPC는 **Virtual Private Cloud**의 약자로 AWS에서 사용하는 논리적으로 격리된 가상 네트워크이다.
+
+예:
+
+```text
+VPC
+10.0.0.0/16
+```
+
+VPC 내부에 여러 Subnet을 구성할 수 있다.
+
+```text
+VPC 10.0.0.0/16
+│
+├─ Public Subnet
+│  10.0.1.0/24
+│
+└─ Private Subnet
+   10.0.2.0/24
+```
+
+---
+
+# 7. Public Subnet
+
+Public Subnet은 Route Table에 Internet Gateway로 가는 경로가 존재하는 Subnet이다.
+
+예:
+
+```text
+10.0.0.0/16 → local
+0.0.0.0/0   → IGW
+```
+
+### 중요
+
+Public IP가 있다고 Public Subnet이 되는 것이 아니다.
+
+```text
+Public Subnet 여부
+=
+Route Table에 IGW Route가 있는가?
+```
+
+가 핵심이다.
+
+---
+
+# 8. Private Subnet
+
+Private Subnet은 Internet Gateway로 직접 나가는 Route가 없는 Subnet이다.
+
+예:
+
+```text
+10.0.0.0/16 → local
+```
+
+Private Subnet의 EC2가 인터넷 Outbound가 필요하다면 NAT Gateway를 사용할 수 있다.
+
+```text
+Private EC2
+   ↓
+Private Route Table
+   ↓
+NAT Gateway
+   ↓
+Internet Gateway
+   ↓
+Internet
+```
+
+### 핵심
+
+```text
+Private Subnet
+≠ 인터넷을 절대 사용할 수 없음
+
+Private Subnet
+= IGW로 직접 나가는 경로가 없음
+```
+
+---
+
+# 9. Local Route
+
+VPC를 생성하면 기본적으로 VPC 내부 통신을 위한 Local Route가 존재한다.
+
+예:
+
+```text
+10.0.0.0/16 → local
+```
+
+따라서 같은 VPC 안의 서로 다른 Subnet은 기본적으로 내부 라우팅이 가능하다.
+
+예:
+
+```text
+Public EC2
+10.0.1.24
+
+    ↓
+
+Private EC2
+10.0.2.170
+```
+
+두 IP 모두 `10.0.0.0/16` 범위에 포함되므로 Local Route를 통해 통신할 수 있다.
+
+단, Security Group이나 NACL에서 통신이 허용되어 있어야 한다.
+
+---
+
+# 10. Internet Gateway
+
+Internet Gateway는 VPC와 인터넷 사이를 연결한다.
+
+```text
+Internet
+   ↕
+  IGW
+   ↕
+  VPC
+```
+
+하지만 IGW를 VPC에 연결하는 것만으로는 인터넷 통신이 되지 않는다.
+
+Route Table에도 다음과 같은 경로가 필요하다.
+
+```text
+0.0.0.0/0 → IGW
+```
+
+---
+
+# 11. Security Group과 NACL
+
+## Security Group
+
+```text
+적용 위치 = EC2 / ENI
+방식 = Stateful
+```
+
+허용된 요청에 대한 응답 트래픽은 자동으로 허용된다.
+
+---
+
+## Network ACL
+
+```text
+적용 위치 = Subnet
+방식 = Stateless
+```
+
+Inbound와 Outbound를 각각 확인해야 한다.
+
+---
+
+# 12. 다른 네트워크와 VPC 연결
+
+## VPC Peering
+
+두 VPC를 직접 연결한다.
+
+```text
+VPC-A
+  ↕
+VPC-B
+```
+
+---
+
+## Transit Gateway
+
+여러 VPC와 네트워크를 중앙에서 연결하는 허브 역할을 한다.
+
+```text
+VPC-A ─┐
+VPC-B ─┼─ Transit Gateway
+VPC-C ─┤
+VPN   ─┘
+```
+
+---
+
+## Site-to-Site VPN
+
+인터넷을 이용한 암호화 VPN Tunnel을 통해 온프레미스와 AWS를 연결한다.
+
+```text
+On-Premises
+     │
+ VPN Tunnel
+     │
+    AWS
+```
+
+---
+
+## Direct Connect
+
+인터넷이 아닌 전용 회선을 이용해 온프레미스와 AWS를 연결한다.
+
+```text
+On-Premises
+     │
+ Dedicated Connection
+     │
+    AWS
+```
+
+---
+
+# 13. VPC 비용 주의사항
+
+VPC 자체보다 VPC와 함께 사용하는 일부 서비스에서 비용이 발생할 수 있다.
+
+대표적으로:
+
+```text
+NAT Gateway
+Public IPv4
+Data Transfer
+VPN
+Transit Gateway
+```
+
+등이 있다.
+
+특히 NAT Gateway는 다음 기준으로 과금될 수 있다.
+
+```text
+사용 시간
++
+처리한 데이터 양
+```
+
+따라서 실습에서 필요하지 않다면 생성하지 않는 것이 좋다.
+
+---
+
+# 14. VPC 실습 구성
+
+실습에서는 다음 구조를 구성했다.
+
+```text
+VPC
+10.0.0.0/16
+│
+├─ Public Subnet
+│  10.0.1.0/24
+│     │
+│   Public EC2
+│
+└─ Private Subnet
+   10.0.2.0/24
+      │
+   Private EC2
+```
+
+---
+
+# 15. Public Subnet 구성
+
+Public Subnet의 Route Table은 다음과 같이 구성했다.
+
+```text
+10.0.0.0/16 → local
+0.0.0.0/0   → IGW
+```
+
+구조:
+
+```text
+Public EC2
+    ↓
+Subnet
+    ↓
+Route Table
+    ↓
+Internet Gateway
+    ↓
+Internet
+```
+
+Public EC2에는 Public IPv4를 할당하여 외부에서 SSH 접속이 가능하도록 구성했다.
+
+---
+
+# 16. Public EC2 통신 확인
+
+서버에서 다음 명령어로 네트워크 상태를 확인했다.
+
+## IP 확인
+
+```bash
+ip addr
+```
+
+EC2의 Private IP와 네트워크 인터페이스를 확인한다.
+
+---
+
+## Linux Route 확인
+
+```bash
+ip route
+```
+
+Linux 서버 내부에서 패킷을 어떤 경로로 전달하는지 확인한다.
+
+### 중요
+
+```text
+ip route
+= Linux 서버 내부 Route
+
+AWS Route Table
+= VPC/Subnet 수준 Route
+```
+
+둘은 서로 다른 개념이다.
+
+---
+
+## 인터넷 IP 통신 확인
+
+```bash
+ping -c 4 8.8.8.8
+```
+
+IP 수준의 통신 여부를 확인한다.
+
+단, Ping 실패만으로 모든 네트워크 통신이 실패했다고 판단하면 안 된다.
+
+ICMP가 차단되어 있을 수도 있다.
+
+---
+
+## HTTPS 통신 확인
+
+```bash
+curl -I https://www.google.com
+```
+
+HTTP/HTTPS 애플리케이션 수준의 통신을 확인한다.
+
+---
+
+# 17. Private Subnet 구성
+
+Private Subnet의 Route Table은 다음과 같이 구성했다.
+
+```text
+10.0.0.0/16 → local
+```
+
+다음 경로는 추가하지 않았다.
+
+```text
+0.0.0.0/0 → IGW
+```
+
+따라서 인터넷으로 직접 나갈 수 없다.
+
+---
+
+# 18. Public EC2와 Private EC2 통신
+
+예:
+
+```text
+Public EC2
+10.0.1.24
+
+Private EC2
+10.0.2.170
+```
+
+Public EC2에서:
+
+```bash
+ping -c 4 10.0.2.170
+```
+
+을 실행해 VPC 내부 통신을 확인할 수 있다.
+
+통신이 가능한 이유는:
+
+```text
+10.0.0.0/16 → local
+```
+
+Route가 존재하기 때문이다.
+
+---
+
+# 19. Private EC2의 인터넷 통신
+
+현재 Private Route Table:
+
+```text
+10.0.0.0/16 → local
+```
+
+에는 인터넷으로 가는 Route가 없다.
+
+따라서 Private EC2에서는 인터넷 통신이 되지 않는다.
+
+Private EC2 내부에서:
+
+```bash
+ip route
+```
+
+를 실행하면 Linux 기본 Gateway가 보일 수 있다.
+
+예:
+
+```text
+default via 10.0.2.1
+```
+
+하지만 이것이 AWS Route Table에 인터넷 경로가 있다는 뜻은 아니다.
+
+```text
+Linux Route
+↓
+AWS VPC Route Table
+↓
+IGW / NAT 여부 판단
+```
+
+순서로 패킷이 처리된다.
+
+---
+
+# 20. Public Subnet과 Private Subnet 차이
+
+## Public Subnet
+
+```text
+Route Table
+
+10.0.0.0/16 → local
+0.0.0.0/0   → IGW
+```
+
+→ 인터넷으로 직접 통신 가능
+
+---
+
+## Private Subnet
+
+```text
+Route Table
+
+10.0.0.0/16 → local
+```
+
+→ 인터넷으로 직접 통신 불가능
+
+필요한 경우:
+
+```text
+0.0.0.0/0 → NAT Gateway
+```
+
+를 이용해 Outbound 인터넷 통신을 구성할 수 있다.
+
+---
+
+# 21. 네트워크 장애 확인 흐름
+
+외부에서 EC2 웹 서비스에 접속되지 않을 경우 다음 순서로 확인할 수 있다.
+
+```text
+1. EC2 Running 상태 확인
+
+2. Public IP 확인
+
+3. Internet Gateway 연결 확인
+
+4. Route Table 확인
+   0.0.0.0/0 → IGW
+
+5. Security Group 확인
+
+6. Network ACL 확인
+
+7. EC2 내부 IP 확인
+   ip addr
+
+8. Linux Route 확인
+   ip route
+
+9. 서비스 상태 확인
+   systemctl status
+
+10. 포트 Listen 확인
+    ss -tulnp
+
+11. 로그 확인
+```
+
+핵심은 무작정 서비스를 재시작하는 것이 아니라 **패킷이 어느 구간에서 막혔는지 순서대로 확인하는 것**이다.
+
+---
+
+# 22. 3장 핵심 정리
+
+```text
+VPC = AWS의 가상 네트워크
+
+Subnet = VPC 내부 네트워크 분할
+
+Route Table = 트래픽 경로 결정
+
+Internet Gateway = VPC와 인터넷 연결
+
+Public Subnet = IGW Route가 존재
+
+Private Subnet = IGW로 직접 나가는 Route가 없음
+
+NAT Gateway = Private Subnet의 인터넷 Outbound
+
+Security Group = EC2/ENI 수준 Stateful 방화벽
+
+NACL = Subnet 수준 Stateless 방화벽
+
+Local Route = 같은 VPC 내부 통신
+
+VPC Peering = VPC와 VPC 연결
+
+Transit Gateway = 여러 네트워크 중앙 연결
+
+VPN = 인터넷 기반 암호화 연결
+
+Direct Connect = AWS 전용 회선 연결
+```
+
+## 가장 중요한 핵심
+
+> Public Subnet과 Private Subnet을 구분하는 핵심은 Public IP 보유 여부가 아니라 **Route Table에 Internet Gateway로 향하는 경로가 있는지 여부**이다.
+
+```text
+Public Subnet
+0.0.0.0/0 → IGW
+
+Private Subnet
+IGW 직접 Route 없음
+```
 
 
 </details>
-
-
-
-
-
 
 
 
